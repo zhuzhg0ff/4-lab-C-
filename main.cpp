@@ -1,0 +1,138 @@
+#include <iostream>
+#include <limits>
+#include <cmath>
+
+class Money {
+private:
+    unsigned int rubles; // Рубли
+    short int kopeks;    // Копейки
+
+    void normalize() {
+        if (kopeks >= 100) {
+            rubles += kopeks / 100;
+            kopeks = kopeks % 100;
+        } else if (kopeks < 0) {
+            rubles -= (-kopeks) / 100 + 1;
+            kopeks = 100 - (-kopeks) % 100;
+        }
+    }
+
+public:
+    // Конструктор по умолчанию
+    Money() : rubles(0), kopeks(0) {}
+
+    // Конструктор с параметрами
+    Money(unsigned int r, short int k) : rubles(r), kopeks(k) {
+        normalize();
+    }
+
+    // Метод для вывода денег
+    void display() const {
+        std::cout << "Деньги: " << rubles << " рублей и " << kopeks << " копеек." << std::endl;
+    }
+
+    // Задание 1: Метод вычитания Money
+    Money operator-(const Money& other) const {
+        int total_kopeks1 = rubles * 100 + kopeks;
+        int total_kopeks2 = other.rubles * 100 + other.kopeks;
+        int result_kopeks = total_kopeks1 - total_kopeks2;
+
+        // Если результат отрицателен, вернем 0
+        if (result_kopeks < 0) {
+            return Money(0, 0);
+        }
+
+        unsigned int result_rubles = result_kopeks / 100;
+        short int result_kopeks_final = result_kopeks % 100;
+
+        return Money(result_rubles, result_kopeks_final);
+    }
+
+    // Бинарная операция вычитания (Money - unsigned int)
+    Money operator-(unsigned int amount) const {
+        int total_kopeks = (rubles * 100 + kopeks) - (amount * 100);
+        
+        // Если результат отрицателен, вернем 0
+        if (total_kopeks < 0) {
+            return Money(0, 0);
+        }
+
+        return Money(total_kopeks / 100, total_kopeks % 100);
+    }
+
+    // Операция инкремента
+    Money& operator++() {  // Префиксный инкремент (прибавить 1 копейку)
+        kopeks++;
+        normalize();
+        return *this;
+    }
+
+    // Операция декремента
+    Money& operator--() {  // Префиксный декремент (убавить 1 копейку)
+        kopeks--;
+        normalize();
+        return *this;
+    }
+
+    // Преобразование к unsigned int (рубли)
+    operator unsigned int() const {
+        return rubles;
+    }
+
+    // Преобразование к double (копейки в рубли)
+    operator double() const {
+        return kopeks / 100.0;
+    }
+};
+
+int main() {
+    unsigned int rubles1, rubles2;
+    short int kopeks1, kopeks2;
+
+    // Ввод данных для первого объекта
+    std::cout << "Введите рубли и копейки для первого объекта: ";
+    std::cin >> rubles1 >> kopeks1;
+
+    // Ввод данных для второго объекта
+    std::cout << "Введите рубли и копейки для второго объекта: ";
+    std::cin >> rubles2 >> kopeks2;
+
+    // Создаем два объекта класса Money
+    Money money1(rubles1, kopeks1);
+    Money money2(rubles2, kopeks2);
+
+    // Выводим введенные данные
+    std::cout << "Первый объект: ";
+    money1.display();
+    std::cout << "Второй объект: ";
+    money2.display();
+
+    // Операция вычитания Money
+    Money result = money1 - money2;
+    std::cout << "Результат вычитания Money: ";
+    result.display();
+
+    // Операции инкремента и декремента
+    ++money1;
+    --money2;
+
+    std::cout << "После инкремента первого объекта: ";
+    money1.display();
+    std::cout << "После декремента второго объекта: ";
+    money2.display();
+
+    // Преобразование типов
+    unsigned int rubles_from_money = money1;
+    double kopeks_from_money = static_cast<double>(money2);
+
+    std::cout << "Первый объект как количество рублей: " << rubles_from_money << " рублей" << std::endl;
+    std::cout << "Второй объект как копейки в рублях (неполные рубли): " << kopeks_from_money << std::endl;
+
+    // Вычитание с беззнаковым целым числом
+    unsigned int amount = 2;  // Например, 2 рубля
+    Money result2 = money1 - amount;
+    std::cout << "Результат вычитания с числом " << amount << " рублей: ";
+    result2.display();
+
+    return 0;
+}
